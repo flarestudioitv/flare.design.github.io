@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#f3f5f0">
-    <title>Население областей Казахстана</title>
+    <title>Население регионов Казахстана</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -196,7 +196,7 @@
             right: 15px;
             bottom: 13px;
             color: #7c9186;
-            content: "KAZAKHSTAN  /  OBLASTS";
+            content: "KAZAKHSTAN  /  REGIONS";
             font: 9px var(--mono);
             letter-spacing: .06em;
             pointer-events: none;
@@ -239,6 +239,10 @@
             fill: var(--green-5);
         }
 
+        .region.is-city {
+            fill: var(--coral);
+        }
+
         .region:hover,
         .region:focus-visible,
         .region.is-active {
@@ -250,6 +254,27 @@
 
         .region.is-muted {
             opacity: .42;
+        }
+
+        .city-marker-halo {
+            fill: var(--coral);
+            opacity: .2;
+            pointer-events: none;
+        }
+
+        .city-marker {
+            fill: var(--coral);
+            stroke: #fff;
+            stroke-width: 2px;
+            vector-effect: non-scaling-stroke;
+            cursor: pointer;
+        }
+
+        .city-marker:focus-visible,
+        .city-marker.is-active {
+            stroke: var(--ink);
+            stroke-width: 3px;
+            outline: none;
         }
 
         .map-label {
@@ -437,6 +462,10 @@
             height: 100%;
             background: var(--green-4);
             transition: width .25s ease;
+        }
+
+        .rank-row[data-type="city"] .rank-bar>i {
+            background: var(--coral);
         }
 
         .rank-value {
@@ -699,18 +728,18 @@
 
         <section class="intro fade-in">
             <div>
-                <p class="eyebrow">Региональная статистика · 17 областей</p>
-                <h1>Население областей<br>Казахстана</h1>
+                <p class="eyebrow">Региональная статистика · 17 областей и 3 города</p>
+                <h1>Население регионов<br>Казахстана</h1>
             </div>
-            <p class="intro-note">Численность постоянного населения. Наведите курсор на область или выберите её в
-                списке.</p>
+            <p class="intro-note">Численность постоянного населения. Города республиканского значения показаны отдельно.
+            </p>
         </section>
 
         <section class="summary" aria-label="Сводка">
-            <div class="summary-item"><span class="summary-label">Население областей</span><span class="summary-value"
-                    id="total-population">—<small>человек</small></span></div>
-            <div class="summary-item"><span class="summary-label">Областей в наборе</span><span class="summary-value"
-                    id="region-count">—<small>из 17</small></span></div>
+            <div class="summary-item"><span class="summary-label">Население всех регионов</span><span
+                    class="summary-value" id="total-population">—<small>человек</small></span></div>
+            <div class="summary-item"><span class="summary-label">Областей и городов</span><span class="summary-value"
+                    id="region-count">—<small>из 20</small></span></div>
             <div class="summary-item"><span class="summary-label">Дата статистики</span><span
                     class="summary-value">01.08.2026</span></div>
         </section>
@@ -719,13 +748,14 @@
             <section aria-labelledby="map-heading">
                 <div class="section-head">
                     <h2 class="section-title" id="map-heading">Картограмма населения</h2>
-                    <span class="section-kicker">БОЛЬШЕ НАСЕЛЕНИЕ → ТЕМНЕЕ ЦВЕТ</span>
+                    <span class="section-kicker">ОБЛАСТИ · ГОРОДА ПОКАЗАНЫ ТОЧКАМИ</span>
                 </div>
                 <div class="map-stage" id="map-stage">
                     <svg id="kazakhstan-map" viewBox="0 0 600 340" role="img"
-                        aria-label="Карта областей Казахстана, окрашенная по численности населения">
+                        aria-label="Карта областей и городов Казахстана, окрашенная по численности населения">
                         <g id="regions"></g>
                         <g id="labels"></g>
+                        <g id="city-markers"></g>
                     </svg>
                     <div class="load-message" id="load-message">Загружаем границы областей…</div>
                     <div class="tooltip" id="tooltip" role="status" hidden></div>
@@ -746,18 +776,20 @@
                                 style="background:var(--green-2)"></i><i class="swatch"
                                 style="background:var(--green-3)"></i><i class="swatch"
                                 style="background:var(--green-4)"></i><i class="swatch"
-                                style="background:var(--green-5)"></i></span><span>свыше 1,5 млн</span></div>
+                                style="background:var(--green-5)"></i></span><span>свыше 1,5 млн</span><i class="swatch"
+                            style="width:9px;height:9px;border-radius:50%;background:var(--coral)"></i><span>город</span>
+                    </div>
                 </div>
             </section>
 
             <aside class="panel" aria-labelledby="ranking-heading">
                 <div class="section-head">
-                    <h2 class="section-title" id="ranking-heading">Области</h2>
-                    <span class="section-kicker" id="visible-count">17 РЕГИОНОВ</span>
+                    <h2 class="section-title" id="ranking-heading">Регионы</h2>
+                    <span class="section-kicker" id="visible-count">20 ОБЪЕКТОВ</span>
                 </div>
                 <div class="panel-controls">
-                    <input class="search" id="region-search" type="search" placeholder="Найти область"
-                        aria-label="Найти область">
+                    <input class="search" id="region-search" type="search" placeholder="Найти регион или город"
+                        aria-label="Найти регион или город">
                     <select class="sort" id="sort-order" aria-label="Порядок областей">
                         <option value="population">По населению</option>
                         <option value="name">По названию</option>
@@ -766,9 +798,9 @@
                 <div class="ranking" id="ranking" aria-live="polite"></div>
                 <div class="selection" id="selection" aria-live="polite">
                     <div>
-                        <div class="selection-label">Выбранная область</div>
+                        <div class="selection-label">Выбранный регион</div>
                         <div class="selection-name" id="selected-name">Наведите на карту</div>
-                        <div class="selection-rank" id="selected-rank">или выберите область в списке</div>
+                        <div class="selection-rank" id="selected-rank">или выберите регион в списке</div>
                     </div>
                     <div class="selection-value" id="selected-value">—<small>человек</small></div>
                 </div>
@@ -788,8 +820,8 @@
 
         <footer class="source-line">
             <span>Источник населения: <a href="https://stat.gov.kz/ru/region/" target="_blank" rel="noreferrer">Бюро
-                    национальной статистики РК</a>, на 1 августа 2026 г. Города республиканского значения
-                исключены.</span>
+                    национальной статистики РК</a>, на 1 августа 2026 г. Включены 17 областей и три города
+                республиканского значения.</span>
             <span>Границы: <a href="https://github.com/galymorg/new_qazaqstan_GeoJSON" target="_blank"
                     rel="noreferrer">new_qazaqstan_GeoJSON</a> · MIT · made by zhidebayev diyar</span>
         </footer>
@@ -797,8 +829,8 @@
 
     <script>
         const DATA_URL = "https://raw.githubusercontent.com/galymorg/new_qazaqstan_GeoJSON/main/regions.json";
-        const cityCodes = new Set(["KZ71", "KZ75", "KZ79"]);
         const populationByCode = {
+            KZ71: ["г. Астана", 1690605, "city"],
             KZ10: ["Абайская", 591903],
             KZ11: ["Акмолинская", 793929],
             KZ15: ["Актюбинская", 958622],
@@ -815,12 +847,15 @@
             KZ59: ["Северо-Казахстанская", 511455],
             KZ61: ["Туркестанская", 2144993],
             KZ62: ["Улытауская", 217670],
-            KZ63: ["Восточно-Казахстанская", 716049]
+            KZ63: ["Восточно-Казахстанская", 716049],
+            KZ75: ["г. Алматы", 2379793, "city"],
+            KZ79: ["г. Шымкент", 1313348, "city"]
         };
         const colors = ["#e8eedc", "#c5dcae", "#94c28a", "#5c9d76", "#28755e", "#154d43"];
         const formatNumber = new Intl.NumberFormat("ru-RU");
         const regionLayer = document.getElementById("regions");
         const labelLayer = document.getElementById("labels");
+        const cityMarkerLayer = document.getElementById("city-markers");
         const ranking = document.getElementById("ranking");
         const tooltip = document.getElementById("tooltip");
         const mapStage = document.getElementById("map-stage");
@@ -849,13 +884,14 @@
         }
 
         function syncActiveState() {
-            document.querySelectorAll(".region").forEach(path => path.classList.toggle("is-active", path.dataset.code === selectedCode));
+            document.querySelectorAll(".region, .city-marker").forEach(path => path.classList.toggle("is-active", path.dataset.code === selectedCode));
             document.querySelectorAll(".rank-row").forEach(row => row.classList.toggle("is-active", row.dataset.code === selectedCode));
         }
 
         function tooltipMarkup(region) {
             const rank = regions.slice().sort((a, b) => b.population - a.population).findIndex(item => item.code === region.code) + 1;
-            return `<div class="tooltip-name">${region.name} область</div><div class="tooltip-pop">${formatNumber.format(region.population)}</div><div class="tooltip-detail">человек · место ${rank} из ${regions.length}</div>`;
+            const kind = region.type === "city" ? "город республиканского значения" : "область";
+            return `<div class="tooltip-name">${region.name}</div><div class="tooltip-pop">${formatNumber.format(region.population)}</div><div class="tooltip-detail">${kind} · человек · место ${rank} из ${regions.length}</div>`;
         }
 
         function showTooltip(region, event) {
@@ -873,12 +909,12 @@
             const order = document.getElementById("sort-order").value;
             const filtered = regions.filter(region => region.name.toLocaleLowerCase("ru").includes(query));
             filtered.sort(order === "name" ? (a, b) => a.name.localeCompare(b.name, "ru") : (a, b) => b.population - a.population);
-            document.getElementById("visible-count").textContent = `${filtered.length} ${filtered.length === 1 ? "ОБЛАСТЬ" : "ОБЛАСТЕЙ"}`;
+            document.getElementById("visible-count").textContent = `НАЙДЕНО: ${filtered.length}`;
             ranking.replaceChildren();
             if (!filtered.length) {
                 const empty = document.createElement("div");
                 empty.className = "empty-state";
-                empty.textContent = "Область не найдена";
+                empty.textContent = "Регион или город не найден";
                 ranking.append(empty);
                 return;
             }
@@ -888,6 +924,7 @@
                 row.type = "button";
                 row.className = "rank-row";
                 row.dataset.code = region.code;
+                row.dataset.type = region.type;
                 row.setAttribute("aria-label", `${region.name}: ${formatNumber.format(region.population)} человек`);
                 row.innerHTML = `<span class="rank-number">${String(index + 1).padStart(2, "0")}</span><span class="rank-main"><span class="rank-name"></span><span class="rank-bar"><i style="width:${Math.round(region.population / largest * 100)}%"></i></span></span><span class="rank-value">${formatNumber.format(region.population)}</span>`;
                 row.querySelector(".rank-name").textContent = region.name;
@@ -900,13 +937,13 @@
         }
 
         function focusRegion(code) {
-            document.querySelectorAll(".region").forEach(path => path.classList.toggle("is-muted", path.dataset.code !== code));
+            document.querySelectorAll(".region, .city-marker").forEach(path => path.classList.toggle("is-muted", path.dataset.code !== code));
             const region = regions.find(item => item.code === code);
             if (region) showTooltip(region);
         }
 
         function restoreSelectedRegion() {
-            document.querySelectorAll(".region").forEach(path => path.classList.remove("is-muted"));
+            document.querySelectorAll(".region, .city-marker").forEach(path => path.classList.remove("is-muted"));
             if (selectedCode) {
                 const region = regions.find(item => item.code === selectedCode);
                 if (region) showTooltip(region);
@@ -916,21 +953,22 @@
         }
 
         function drawMap(boundaries) {
-            const regionItems = boundaries.filter(item => !cityCodes.has(item.pcode) && populationByCode[item.pcode]);
+            const regionItems = boundaries.filter(item => populationByCode[item.pcode]);
             regions = regionItems.map(item => ({
                 code: item.pcode,
                 name: populationByCode[item.pcode][0],
                 population: populationByCode[item.pcode][1],
+                type: populationByCode[item.pcode][2] || "oblast",
                 path: item.path,
                 x: item.cx,
                 y: item.cy
             }));
-            if (regions.length !== 17) throw new Error(`Ожидалось 17 областей, получено ${regions.length}`);
+            if (regions.length !== 20) throw new Error(`Ожидалось 20 регионов и городов, получено ${regions.length}`);
 
             regions.forEach(region => {
                 const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 path.setAttribute("d", region.path);
-                path.setAttribute("class", "region");
+                path.setAttribute("class", region.type === "city" ? "region is-city" : "region");
                 path.setAttribute("fill", colors[levelFor(region.population)]);
                 path.setAttribute("tabindex", "0");
                 path.setAttribute("role", "button");
@@ -949,13 +987,39 @@
                 label.setAttribute("x", region.x);
                 label.setAttribute("y", region.y);
                 label.setAttribute("class", "map-label");
-                label.textContent = region.name.replace(/ская$/, "").replace(/ская$/, "");
-                labelLayer.append(label);
+                label.textContent = region.name.replace(/ская$/, "");
+                if (region.type !== "city") labelLayer.append(label);
+
+                if (region.type === "city") {
+                    const halo = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    halo.setAttribute("cx", region.x);
+                    halo.setAttribute("cy", region.y);
+                    halo.setAttribute("r", "12");
+                    halo.setAttribute("class", "city-marker-halo");
+                    cityMarkerLayer.append(halo);
+
+                    const marker = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    marker.setAttribute("cx", region.x);
+                    marker.setAttribute("cy", region.y);
+                    marker.setAttribute("r", "7");
+                    marker.setAttribute("class", "city-marker");
+                    marker.setAttribute("tabindex", "0");
+                    marker.setAttribute("role", "button");
+                    marker.setAttribute("aria-label", `${region.name}: ${formatNumber.format(region.population)} человек, город республиканского значения`);
+                    marker.dataset.code = region.code;
+                    marker.addEventListener("pointerenter", event => { focusRegion(region.code); showTooltip(region, event); });
+                    marker.addEventListener("pointermove", event => showTooltip(region, event));
+                    marker.addEventListener("pointerleave", restoreSelectedRegion);
+                    marker.addEventListener("click", () => selectRegion(region.code));
+                    marker.addEventListener("focus", () => { selectRegion(region.code); showTooltip(region); });
+                    marker.addEventListener("blur", restoreSelectedRegion);
+                    cityMarkerLayer.append(marker);
+                }
             });
 
             const total = regions.reduce((sum, region) => sum + region.population, 0);
             document.getElementById("total-population").innerHTML = `${formatNumber.format(total)}<small>человек</small>`;
-            document.getElementById("region-count").innerHTML = `${regions.length}<small>областей</small>`;
+            document.getElementById("region-count").innerHTML = `${regions.length}<small>объектов</small>`;
             document.getElementById("load-message").hidden = true;
             renderRanking();
         }
@@ -966,7 +1030,7 @@
         document.getElementById("zoom-out").addEventListener("click", () => { viewScale = Math.max(.8, viewScale - .12); mapSvg.style.transform = `scale(${viewScale})`; });
         document.getElementById("zoom-reset").addEventListener("click", () => { viewScale = 1; mapSvg.style.transform = "scale(1)"; });
         document.getElementById("download-csv").addEventListener("click", () => {
-            const rows = [["Область", "Население, человек", "Дата"], ...regions.slice().sort((a, b) => a.name.localeCompare(b.name, "ru")).map(region => [region.name, region.population, "01.08.2026"])];
+            const rows = [["Регион или город", "Тип", "Население, человек", "Дата"], ...regions.slice().sort((a, b) => a.name.localeCompare(b.name, "ru")).map(region => [region.name, region.type === "city" ? "Город республиканского значения" : "Область", region.population, "01.08.2026"])];
             const csv = "\uFEFF" + rows.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(";")).join("\r\n");
             const link = document.createElement("a");
             link.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
